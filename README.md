@@ -1,6 +1,7 @@
-# IBM Final Python Project for Data Engineering
+# Acquiring and Processing Information on the World's Largest Banks
+### IBM Final Python Project for Data Engineering 
 
-Objectives:
+#### Objectives:
 
 1. Write a function to extract the tabular information from the given URL under the heading By Market Capitalization, and save it to a data frame.
 2. Write a function to transform the data frame by adding columns for Market Capitalization in GBP, EUR, and INR, rounded to 2 decimal places, based on the exchange rate information shared as a CSV file.
