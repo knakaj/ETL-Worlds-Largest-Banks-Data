@@ -14,7 +14,8 @@ url = 'https://web.archive.org/web/20230908091635/https://en.wikipedia.org/wiki/
 table_attribs = ['Name', 'MC_USD_Billion'] 
 db_name = 'Banks.db'
 table_name = 'Largest_banks'
-csv_path = './largest_banks_data.csv' 
+exchange_rate_csv_path = './exchange_rate.csv'
+output_csv_path = './largest_banks_data.csv' 
 
 
 def log_progress(message):
@@ -59,13 +60,13 @@ def extract(url, table_attribs):
 
 
 
-def transform(df, csv_path):
+def transform(df, exchange_rate_csv_path ):
     ''' This function accesses the CSV file for exchange rate
     information, and adds three columns to the data frame, each
     containing the transformed version of Market Cap column to
     respective currencies'''
 
-    exchange_rate_df = pd.read_csv(csv_path) 
+    exchange_rate_df = pd.read_csv(exchange_rate_csv_path) 
     exchange_rate = exchange_rate_df.set_index('Currency').to_dict()['Rate']
 
     # Add the 'MC_GBP_Billion' column
@@ -80,9 +81,11 @@ def transform(df, csv_path):
     return df
 
 
-def load_to_csv(df, output_path):
+def load_to_csv(df, output_csv_path):
     ''' This function saves the final data frame as a CSV file in
     the provided path.'''
+
+    df.to_csv(output_csv_path)
 
 
 def load_to_db(df, sql_connection, table_name):
@@ -95,8 +98,6 @@ def run_query(query_statement, sql_connection):
     prints the output on the terminal. '''
 
 """
-#call load to csv
-log_progress('Data saved to CSV file')
 #initiate sqlite3 ocnnection
 log_progress('SQL Connection initiated')
 #call load to db
@@ -115,7 +116,8 @@ log_progress('Preliminaries complete. Initiating ETL process')
 df = extract(url,table_attribs)
 log_progress('Data extraction complete. Initiating Transformation process')
 
-df = transform(df, "./exchange_rate.csv")
+df = transform(df, exchange_rate_csv_path)
 log_progress('Data transformation complete. Initiating Loading process')
-print(df)
-print("Content of the fourth index on the MC_EUR_Billion column:" , df['MC_EUR_Billion'][4])
+     
+load_to_csv(df, output_csv_path)
+log_progress('Data saved to CSV file')
