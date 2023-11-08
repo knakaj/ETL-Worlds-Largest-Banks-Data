@@ -99,12 +99,14 @@ def run_query(query_statement, sql_connection):
     ''' This function runs the query on the database table and
     prints the output on the terminal. '''
 
+    print(query_statement)
+    query_output = pd.read_sql(query_statement, sql_connection)
+    print(query_output)
+    
+
 """
-#initiate sqlite3 ocnnection
-log_progress('SQL Connection initiated')
-#call load to db
-log_progress('Data loaded to Database as a table, Executing queries')
-#call run query 
+
+
 log_progress('Process Complete')
 #close the connection
 log_progress('Server Connection closed')
@@ -130,3 +132,19 @@ log_progress('SQL Connection initiated.')
 load_to_db(df, conn, table_name)
 log_progress('Data loaded to Database as table.')
 
+# Print the contents of the entire table
+query_statement = f"SELECT * FROM {table_name}"
+run_query(query_statement, conn)
+
+# Print the average market capitalization of all the banks in Billion USD.
+query_statement = f"SELECT AVG(MC_GBP_Billion) FROM {table_name}"
+run_query(query_statement, conn)
+
+# Print only the names of the top 5 banks
+query_statement = f"SELECT Name from {table_name} LIMIT 5"
+run_query(query_statement, conn)
+
+log_progress('Process Complete')
+
+conn.close()
+log_progress('Server Connection closed')
