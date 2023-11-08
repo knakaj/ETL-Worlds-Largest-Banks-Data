@@ -35,27 +35,26 @@ def extract(url, table_attribs):
     html_page = requests.get(url).text  # Extract the webpage as text
     data = BeautifulSoup(html_page, 'html.parser') # Parse the text into an HTML object
     df = pd.DataFrame(columns=table_attribs) # Create a pandas dataframe with table attributes as columns
- 
-    # Find the heading "By market capitalization"
-    #heading = data.find('span', {'id': 'By_market_capitalization'})
-    # Find the table following the heading
-    #table = heading.find_next('table')
 
     tables = data.find_all('tbody')
     rows = tables[0].find_all('tr')
 
-    df = pd.DataFrame(columns=table_attribs)
-
     for row in rows: 
         columns = row.find_all('td')
-        row_data = [column.text.strip() for column in columns]
-        # Remove the last character ('\n') from the Market Cap column and typecast to float
-        row_data[2] = float(row_data[2][:-1].replace(',', ''))
-        table_data.append(row_data)
-    
-    # Create a Pandas DataFrame
-    df = pd.DataFrame(table_data, columns=table_attribs)
-    
+
+        if len(columns) != 0:
+            #name = str(columns[1].contents[0])  # Extract the second column
+            #mc_usd_billion = columns[2].contents[0]  # Extract the third column
+            name = columns[1].get_text().strip()
+            mc_usd_billion = columns[2].get_text().strip()
+            try:
+                mc_usd_billion_float = float(mc_usd_billion)
+                data_dict = {"Name": name, "MC_USD_Billion": mc_usd_billion_float}
+                df1 = pd.DataFrame(data_dict, index=[0])
+                df = pd.concat([df, df1], ignore_index=True)
+            except ValueError:
+                # Handle the case where mc_usd_billion cannot be converted to a float
+                print(f"Skipping row with invalid MC_USD_Billion: {mc_usd_billion}")
     return df
 
 
@@ -65,6 +64,19 @@ def transform(df, csv_path):
     information, and adds three columns to the data frame, each
     containing the transformed version of Market Cap column to
     respective currencies'''
+
+    exchange_rate_df = pd.read_csv(csv_path) 
+    exchange_rate = exchange_rate_df.set_index('Currency').to_dict()['Rate']
+
+    # Add the 'MC_GBP_Billion' column
+    df['MC_GBP_Billion'] = [np.round(x * exchange_rate['GBP'], 2) for x in df['MC_USD_Billion']]
+
+    # Add the 'MC_EUR_Billion' column
+    df['MC_EUR_Billion'] = [np.round(x * exchange_rate['EUR'], 2) for x in df['MC_USD_Billion']]
+
+    # Add the 'MC_INR_Billion' column
+    df['MC_INR_Billion'] = [np.round(x * exchange_rate['INR'], 2) for x in df['MC_USD_Billion']]
+
     return df
 
 
@@ -83,13 +95,6 @@ def run_query(query_statement, sql_connection):
     prints the output on the terminal. '''
 
 """
-
-log_progress('Preliminaries complete. Initiating ETL process')
-
-#call extract
-log_progress('Data extraction complete. Initiating Transformation process')
-#call transform
-log_progress('Data transformation complete. Initiating Loading process')
 #call load to csv
 log_progress('Data saved to CSV file')
 #initiate sqlite3 ocnnection
@@ -104,7 +109,13 @@ log_progress('Server Connection closed')
     
 """
 
-# Function call to extract the table
+
+log_progress('Preliminaries complete. Initiating ETL process')
+
 df = extract(url,table_attribs)
-# Print the resulting DataFrame
+log_progress('Data extraction complete. Initiating Transformation process')
+
+df = transform(df, "./exchange_rate.csv")
+log_progress('Data transformation complete. Initiating Loading process')
 print(df)
+print("Content of the fourth index on the MC_EUR_Billion column:" , df['MC_EUR_Billion'][4])
