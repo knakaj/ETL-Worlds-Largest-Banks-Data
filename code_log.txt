@@ -9,3 +9,9 @@
 2023-Nov-07-22:55:19:Data extraction complete. Initiating Transformation process
 2023-Nov-07-22:55:19:Data transformation complete. Initiating Loading process
 2023-Nov-07-22:55:19:Data saved to CSV file
+2023-Nov-07-23:00:14:Preliminaries complete. Initiating ETL process
+2023-Nov-07-23:00:14:Data extraction complete. Initiating Transformation process
+2023-Nov-07-23:00:14:Data transformation complete. Initiating Loading process
+2023-Nov-07-23:00:14:Data saved to CSV file
+2023-Nov-07-23:00:14:SQL Connection initiated.
+2023-Nov-07-23:00:14:Data loaded to Database as table.
